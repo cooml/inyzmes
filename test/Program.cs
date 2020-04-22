@@ -21,24 +21,49 @@ namespace Iocp
     public static ConcurrentDictionary<string, byte[]> websocketdatecahe = new ConcurrentDictionary<string, byte[]>();
     public static ConcurrentDictionary<string, string> userip = new ConcurrentDictionary<string, string>();
     /// <summary>发送的socket
-    //main
     /// </summary>
     public static IoServer socketserver;
     static void Main(string[] args)
     {
-      //test
-      socketserver = new IoServer(15, 1024);
+      socketserver = new IoServer(60, 1024);
       ////////socketserver.Start("127.0.0.1", 6789);
       socketserver.Start(6789);
       socketserver.ReceiveEvent = new onezl.iocp.ReceiveEventHandler(myfuncion);
+      socketserver.DownLineEvent = new onezl.iocp.DownLineHandler(Downline);
       socketserver.Name = "RegClean";
       Console.WriteLine("start");
     }
 
+    private static void Downline(onezl.iocp.AsyncSocketUserToken SocketArg)
+    {
+      var ipstr = SocketArg.IpportStr;
+      var aaaa = new byte[0];
+      websocketdatecahe.TryRemove(SocketArg.IpportStr, out aaaa);
+      Console.WriteLine("掉线客户端："+ipstr);
 
+      if (userip.ContainsKey(ipstr))
+      {
+        foreach (var item in userlist)
+        {
+          if (item.Key != userip[ipstr])
+          {
+            DataFrame dfff = new DataFrame("用户：" + userip[ipstr] + "已经掉线");
+            socketserver.PushSendQue(item.Value, dfff.GetBytes());
+            DataFrame dfff1 = new DataFrame("userlist," + string.Join(",", userlist.Select(a => a.Key).Where(b => b != userip[ipstr])));
+            socketserver.PushSendQue(item.Value, dfff1.GetBytes());
+          }
+        }
+        var o = new SocketAsyncEventArgs();
+        userlist.TryRemove(userip[ipstr], out o);
+        var stemp = "";
+        userip.TryRemove(ipstr, out stemp);
+
+      }
+
+    }
     private static byte[] CombomBinaryArray(byte[] srcArray1, byte[] srcArray2)
     {
-      ////根据要合并的两个数组元素总数新建一个数组
+      //根据要合并的两个数组元素总数新建一个数组
       byte[] newArray = new byte[srcArray1.Length + srcArray2.Length];
 
       //把第一个数组复制到新建数组
@@ -51,21 +76,30 @@ namespace Iocp
     }
     private static void myfuncion(onezl.iocp.AsyncSocketUserToken SocketArg, byte[] byteArr)
     {
+     // socketserver.ShutdownSocket(SocketArg.ReceiveEventArgs.UserToken as Socket, SocketArg.ReceiveEventArgs);//-------掉线操作
+
       try
       {
 
-
+        if (byteArr.Length < 1)
+        {
+          return;
+        }
         //连接
 
         //socketserver.PushSendQue(SocketArg.ReceiveEventArgs, Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\nContent-Type:text/html;charset=utf-8\r\nContent-Length:18\r\n\r\nWelcome to tinyweb"));
         //   return;
 
-        Console.WriteLine("queueid:" + SocketArg.QueueId);
+       // Console.WriteLine("queueid:" + SocketArg.QueueId);
         string strAll = Encoding.UTF8.GetString(byteArr);
 
-        Console.WriteLine(strAll);
-        string appNum = strAll.Substring(0, 2);
-        string commandStr = strAll.Substring(0, 6);
+        //Console.WriteLine(strAll);
+
+        string commandStr = "";
+        if (strAll.Length > 5)
+        {
+          commandStr = strAll.Substring(0, 6);
+        }      
         string str = strAll.Substring(6);
         string[] strs = str.Split(new string[] { "[f.ff]" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -73,45 +107,8 @@ namespace Iocp
         switch (commandStr)
         {
 
-
-          case "000505":
-            var ipstr = SocketArg.IpportStr;
-            socketserver.CleandicBuffer(SocketArg.QueueId, SocketArg.IpportStr); //清空粘包缓存区
-            socketserver.CloseClientSocketTopool((SocketArg.ReceiveEventArgs.UserToken as Socket),
-                SocketArg.ReceiveEventArgs); //把异步对象清空，投入异步对象池中重新利用
-
-            var aaaa = new byte[0];
-            websocketdatecahe.TryRemove(SocketArg.IpportStr, out aaaa);
-
-
-            if (userip.ContainsKey(ipstr))
-            {
-              foreach (var item in userlist)
-              {
-                if (item.Key != userip[ipstr])
-                {
-                  DataFrame dfff = new DataFrame("用户：" + userip[ipstr] + "已经掉线");
-                  socketserver.PushSendQue(item.Value, dfff.GetBytes());
-                  DataFrame dfff1 = new DataFrame("userlist," + string.Join(",", userlist.Select(a => a.Key).Where(b => b != userip[ipstr])));
-                  socketserver.PushSendQue(item.Value, dfff1.GetBytes());
-                }
-              }
-              var o = new SocketAsyncEventArgs();
-              userlist.TryRemove(userip[ipstr], out o);
-              var stemp = "";
-              userip.TryRemove(ipstr, out stemp);
-
-            }
-
-
-
-            break;
-
-          case "000506":
-
-
-            socketserver.CleandicBufferforConnect(SocketArg.QueueId, SocketArg.IpportStr, SocketArg.ReceiveEventArgs); //清空粘包缓存区，并且返回池子
-            break;
+         
+            
 
           case "000001"://注册身份命令 001[f.f]黎明
 
@@ -169,7 +166,7 @@ namespace Iocp
                                    + "Connection: Upgrade" + Environment.NewLine
                                    + "Upgrade: websocket" + Environment.NewLine
                                    + "Sec-WebSocket-Accept: " + setWebSocketAccept + Environment.NewLine + Environment.NewLine);
-                Console.WriteLine(response);
+               // Console.WriteLine(response);
                 socketserver.PushSendQue(SocketArg.ReceiveEventArgs, Encoding.UTF8.GetBytes(response));
                 return;
               }
@@ -180,7 +177,7 @@ namespace Iocp
 
 
 
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("default case exp:" + ex.Message);
 
               }
 
@@ -200,7 +197,7 @@ namespace Iocp
             }
             else
             {
-
+             
 
               websocketdatecahe[SocketArg.IpportStr] = CombomBinaryArray(websocketdatecahe[SocketArg.IpportStr], byteArr);
 
@@ -335,7 +332,7 @@ namespace Iocp
       catch (Exception ex)
       {
 
-        Console.WriteLine(ex.Message);
+        Console.WriteLine("exp ssss"+ex.Message);
       }
 
 

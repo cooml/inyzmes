@@ -89,8 +89,8 @@ namespace onezl.iocp
           }
           else
           {
-            return new SocketAsyncEventArgs();
-            //return null;
+           
+            return null;
 
           }
 

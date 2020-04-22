@@ -1,4 +1,5 @@
-﻿using System;
+﻿using onezl.iocp.com;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace onezl.iocp
     {
     public static void WriteLog(string logmes)
     {
-      Console.WriteLine("写日志：-----"+logmes);
+      LogHelper.WriteLog(logmes);
     }
   }
 }

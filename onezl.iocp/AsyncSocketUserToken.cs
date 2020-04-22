@@ -13,7 +13,7 @@ namespace onezl.iocp
   /// </summary>
   public class AsyncSocketUserToken
   {
-    public char issystemorder = '0';//默认不是系统
+    public string issystemorder = "0";//默认不是系统
                                     /// <summary> socket异步对象
                                     /// </summary>
     private SocketAsyncEventArgs m_receiveEventArgs;

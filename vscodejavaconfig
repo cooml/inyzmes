@@ -1,0 +1,21 @@
+{
+    "java.home": "C:\\Program Files\\Java\\jdk1.8.0_202" ,
+    "maven.executable.path":"D:\\apache-maven-3.6.0\\bin\\mvn",
+    "java.configuration.maven.userSettings":"D:\\apache-maven-3.6.0\\conf\\settings.xml",
+    "maven.terminal.customEnv": [
+        {
+            "environmentVariable": "JAVA_HOME",      
+            "value":  "C:\\Program Files\\Java\\jdk1.8.0_202"       
+        }
+    ],
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue"
+
+
+}
