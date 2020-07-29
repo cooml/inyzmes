@@ -26,7 +26,7 @@ namespace Iocp
     static void Main(string[] args)
     {
       socketserver = new IoServer(60, 1024);
-      ////////socketserver.Start("127.0.0.1", 6789);
+      //////////socketserver.Start("127.0.0.1", 6789);
       socketserver.Start(6789);
       socketserver.ReceiveEvent = new onezl.iocp.ReceiveEventHandler(myfuncion);
       socketserver.DownLineEvent = new onezl.iocp.DownLineHandler(Downline);
