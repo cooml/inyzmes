@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\onezl.iocp.com\onezl.iocp.com.csproj" />
+    <ProjectReference Include="..\onezl.iocp\onezl.iocp.csproj" />
+  </ItemGroup>
+
+</Project>
